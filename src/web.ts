@@ -1,4 +1,4 @@
-import { WebPlugin } from '@capacitor/core';
+import {registerWebPlugin, WebPlugin} from '@capacitor/core';
 
 import type { PrivacyContentPlugin } from './definitions';
 
@@ -8,3 +8,7 @@ export class PrivacyContentWeb extends WebPlugin implements PrivacyContentPlugin
     return options;
   }
 }
+
+const PrivacyContent = new PrivacyContentWeb()
+export { PrivacyContent };
+registerWebPlugin(PrivacyContent);

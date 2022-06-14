@@ -47,7 +47,8 @@ public class PrivacyContentPlugin: CAPPlugin {
 
     @objc private func didDetectScreenshot() {
         DispatchQueue.main.async {
-            self.bridge?.triggerJSEvent(eventName: "ScreenshotTakenEvent", target: "window")
+           // self.bridge?.triggerJSEvent(eventName: "ScreenshotTakenEvent", target: "window")
+            self.notifyListeners("ScreenshotTakenEvent", data: ["toma":"esto"])
             self.hideScreen()
             self.presentwarningWindow( "Madyfit no permite capturas de pantalla de nuestro contenido. Estas infrigiendo las políticas de Derechos de Autor (Copyright)")
         }
