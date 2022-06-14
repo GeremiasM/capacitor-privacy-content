@@ -8,9 +8,10 @@ import Capacitor
 @objc(PrivacyContentPlugin)
 public class PrivacyContentPlugin: CAPPlugin {
     private let implementation = PrivacyContent()
-
-    Bridge myBridge;
-
+    
+    var window: UIWindow?
+    private var warningWindow: UIWindow?
+    
     @objc func echo(_ call: CAPPluginCall) {
         let value = call.getString("value") ?? ""
         call.resolve([
@@ -19,7 +20,6 @@ public class PrivacyContentPlugin: CAPPlugin {
     }
 
   public override func load() {
-        myBridge = bridge;
         self.startPreventingRecording()
         self.startPreventingScreenshot()
     }
@@ -32,7 +32,7 @@ public class PrivacyContentPlugin: CAPPlugin {
     }
     @objc private func didDetectRecording() {
         DispatchQueue.main.async {
-            myBridge.triggerJSEvent(eventName: "RecordingDetectedEvent", target: "window")
+            self.bridge?.triggerJSEvent(eventName: "RecordingDetectedEvent", target: "window")
             self.hideScreen()
             self.presentwarningWindow("Madyfit no permite grabar nuestro contenido. Estas infrigiendo las políticas de Derechos de Autor (Copyright)")
         }
@@ -47,7 +47,7 @@ public class PrivacyContentPlugin: CAPPlugin {
 
     @objc private func didDetectScreenshot() {
         DispatchQueue.main.async {
-            myBridge.triggerJSEvent(eventName: "ScreenshotTakenEvent", target: "window")
+            self.bridge?.triggerJSEvent(eventName: "ScreenshotTakenEvent", target: "window")
             self.hideScreen()
             self.presentwarningWindow( "Madyfit no permite capturas de pantalla de nuestro contenido. Estas infrigiendo las políticas de Derechos de Autor (Copyright)")
         }
@@ -71,13 +71,17 @@ public class PrivacyContentPlugin: CAPPlugin {
         // warning window
         var warningWindow = UIWindow(frame: frame)
 
-        let windowScene = UIApplication.shared
-            .connectedScenes
-            .first {
-                $0.activationState == .foregroundActive
+        if #available(iOS 13.0, *) {
+            let windowScene = UIApplication.shared
+                .connectedScenes
+                .first {
+                    $0.activationState == .foregroundActive
+                }
+            if let windowScene = windowScene as? UIWindowScene {
+                warningWindow = UIWindow(windowScene: windowScene)
             }
-        if let windowScene = windowScene as? UIWindowScene {
-            warningWindow = UIWindow(windowScene: windowScene)
+        } else {
+            // Fallback on earlier versions
         }
 
         warningWindow.frame = frame
